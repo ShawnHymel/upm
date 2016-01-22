@@ -42,7 +42,7 @@
 #define GESTURE_SENSITIVITY_2   20
 
 // Error code for returned values
-#define APDS9960_ERROR          0xFF
+#define APDS9960_ERROR          -1
 
 // Acceptable device IDs
 #define APDS9960_ID_1           0xAB
@@ -504,10 +504,9 @@ namespace upm {
             /**
              * @brief Gets the low threshold for ambient light interrupts
              *
-             * @param[out] threshold current low threshold stored on the sensor
-             * @return True if operation successful. False otherwise.
+             * @return current low light threshold. -1 on error.
              */
-            bool getLightIntLowThreshold(uint16_t &threshold);
+            int getLightIntLowThreshold();
             
             /**
              * @brief Sets the low threshold for ambient light interrupts
@@ -520,10 +519,9 @@ namespace upm {
             /**
              * @brief Gets the high threshold for ambient light interrupts
              *
-             * @param[out] threshold current low threshold stored on the sensor
-             * @return True if operation successful. False otherwise.
+             * @return current high threshold. -1 on error.
              */
-            bool getLightIntHighThreshold(uint16_t &threshold);
+            int getLightIntHighThreshold();
             
             /**
              * @brief Sets the high threshold for ambient light interrupts
@@ -540,10 +538,9 @@ namespace upm {
             /**
              * @brief Gets the low threshold for proximity interrupts
              *
-             * @param[out] threshold current low threshold stored on the sensor
-             * @return True if operation successful. False otherwise.
+             * @return current low proximity threshold. -1 on error.
              */
-            bool getProximityIntLowThreshold(uint8_t &threshold);
+            int getProximityIntLowThreshold();
             
             /**
              * @brief Sets the low threshold for proximity interrupts
@@ -556,10 +553,9 @@ namespace upm {
             /**
              * @brief Gets the high threshold for proximity interrupts
              *
-             * @param[out] threshold current low threshold stored on the sensor
-             * @return True if operation successful. False otherwise.
+             * @return current high proximity threshold. -1 on error.
              */
-            bool getProximityIntHighThreshold(uint8_t &threshold);
+            int getProximityIntHighThreshold();
             
             /**
              * @brief Sets the high threshold for proximity interrupts
@@ -643,34 +639,30 @@ namespace upm {
             /**
              * @brief Reads the ambient (clear) light level as a 16-bit value
              *
-             * @param[out] val value of the light sensor.
-             * @return True if operation successful. False otherwise.
+             * @return value of the light sensor. -1 on error.
              */
-            bool readAmbientLight(uint16_t &val);
+            int readAmbientLight();
             
             /**
              * @brief Reads the red light level as a 16-bit value
              *
-             * @param[out] val value of the light sensor.
-             * @return True if operation successful. False otherwise.
+             * @return value of the light sensor. -1 on error.
              */
-            bool readRedLight(uint16_t &val);
+            int readRedLight();
             
             /**
              * @brief Reads the green light level as a 16-bit value
              *
-             * @param[out] val value of the light sensor.
-             * @return True if operation successful. False otherwise.
+             * @return val value of the light sensor. -1 on error.
              */
-            bool readGreenLight(uint16_t &val);
+            int readGreenLight();
             
             /**
              * @brief Reads the blue light level as a 16-bit value
              *
-             * @param[out] val value of the light sensor.
-             * @return True if operation successful. False otherwise.
+             * @return val value of the light sensor. -1 on error.
              */
-            bool readBlueLight(uint16_t &val);
+            int readBlueLight();
             
             //////////////////////////////////////////////////////////////////
             // Proximity methods
@@ -679,10 +671,9 @@ namespace upm {
             /**
              * @brief Reads the proximity level as an 8-bit value
              *
-             * @param[out] val value of the proximity sensor.
-             * @return True if operation successful. False otherwise.
+             * @return value of the proximity sensor. -1 on error.
              */
-            bool readProximity(uint8_t &val);
+            int readProximity();
             
             //////////////////////////////////////////////////////////////////
             // Gesture methods
@@ -732,9 +723,9 @@ namespace upm {
             /**
              * @brief Returns the lower threshold for proximity detection
              *
-             * @return lower threshold
+             * @return lower proximity threshold. -1 on error.
              */
-            uint8_t getProxIntLowThresh();
+            int getProxIntLowThresh();
             
             /**
              * @brief Sets the lower threshold for proximity detection
@@ -747,9 +738,9 @@ namespace upm {
             /**
              * @brief Returns the high threshold for proximity detection
              *
-             * @return high threshold
+             * @return high proximity threshold. -1 on error.
              */
-            uint8_t getProxIntHighThresh();
+            int getProxIntHighThresh();
             
             /**
              * @brief Sets the high threshold for proximity detection
@@ -757,8 +748,8 @@ namespace upm {
              * @param[in] threshold the high proximity threshold
              * @return True if operation successful. False otherwise.
              */
-            bool setProxIntHighThresh(uint8_t threshold);
-            
+            bool setProxIntHighThresh(uint8_t threshold); 
+                       
             //////////////////////////////////////////////////////////////////
             // LED boost control
             //////////////////////////////////////////////////////////////////
@@ -934,14 +925,6 @@ namespace upm {
             //////////////////////////////////////////////////////////////////
             
             /**
-             * @brief Writes a single byte to the I2C device (no register)
-             *
-             * @param[in] val the 1-byte value to write to the I2C device
-             * @return True if successful write operation. False otherwise.
-             */
-            bool wireWriteByte(uint8_t val);
-            
-            /**
              * @brief Writes a single byte to the I2C device and given register
              *
              * @param[in] reg the register in the I2C device to write to
@@ -949,18 +932,6 @@ namespace upm {
              * @return True if successful write operation. False otherwise.
              */
             bool wireWriteDataByte(uint8_t reg, uint8_t val);
-            
-            /**
-             * @brief Writes array of bytes to the I2C device and register
-             *
-             * @param[in] reg the register in the I2C device to write to
-             * @param[in] val pointer to the beginning of the data byte array
-             * @param[in] len the length (in bytes) of the data to write
-             * @return True if successful write operation. False otherwise.
-             */
-            bool wireWriteDataBlock(uint8_t reg, 
-                                    uint8_t *val, 
-                                    unsigned int len);
             
             /**
              * @brief Reads a single byte from the I2C device and given register

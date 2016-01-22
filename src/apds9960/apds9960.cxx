@@ -37,7 +37,7 @@ APDS9960::APDS9960(int bus) : m_i2c(bus)
     
     gesture_near_count_ = 0;
     gesture_far_count_ = 0;
-    
+
     gesture_state_ = 0;
     gesture_motion_ = DIR_NONE;
 }
@@ -58,6 +58,13 @@ bool APDS9960::init()
     if( !wireReadDataByte(APDS9960_ID, id) ) {
         return false;
     }
+#if APDS9960_DEBUG
+    uint8_t temp;
+    if( !wireReadDataByte(APDS9960_ID, temp) ) {
+        return false;
+    }
+    printf("ID: %#04x\n", temp);
+#endif
     if( !(id == APDS9960_ID_1 || id == APDS9960_ID_2) ) {
         return false;
     }
@@ -235,6 +242,16 @@ bool APDS9960::setMode(uint8_t mode, uint8_t enable)
     if( !wireWriteDataByte(APDS9960_ENABLE, reg_val) ) {
         return false;
     }
+    
+#if APDS9960_DEBUG
+    uint8_t temp;
+    if( !wireReadDataByte(APDS9960_ENABLE, temp) ) {
+        return false;
+    }
+    printf("ENABLE:\n");
+    printf("Wrote &%#04x: %#04x\n", APDS9960_ENABLE, reg_val);
+    printf("Read &%#04x: %#04x\n", APDS9960_ENABLE, temp);
+#endif
         
     return true;
 }
@@ -246,6 +263,13 @@ bool APDS9960::enableLightSensor(bool interrupts)
     if( !setAmbientLightGain(DEFAULT_AGAIN) ) {
         return false;
     }
+#if APDS9960_DEBUG
+    uint8_t temp;
+    if( !wireReadDataByte(APDS9960_CONTROL, temp) ) {
+        return false;
+    }
+    printf("CONTROL (&%#04x): %#04x\n", APDS9960_CONTROL, temp);
+#endif
     if( interrupts ) {
         if( !setAmbientLightIntEnable(1) ) {
             return false;
@@ -526,100 +550,108 @@ bool APDS9960::disablePower()
 // Ambient light and color sensor controls
 //////////////////////////////////////////////////////////////////////////////
 
-bool APDS9960::readAmbientLight(uint16_t &val)
+int APDS9960::readAmbientLight()
 {
     uint8_t val_byte;
-    val = 0;
+    int val = 0;
     
     /* Read value from clear channel, low byte register */
     if( !wireReadDataByte(APDS9960_CDATAL, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
-    val = val_byte;
+    val += val_byte;
+    
+#if APDS9960_DEBUG
+    printf("Reading ambient light. B1:%#04x ", val_byte);
+#endif
     
     /* Read value from clear channel, high byte register */
     if( !wireReadDataByte(APDS9960_CDATAH, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     val = val + ((uint16_t)val_byte << 8);
+
+#if APDS9960_DEBUG
+    printf("B2:%#04x Total:%i\n", val_byte, val);
+#endif
     
-    return true;
+    return val;
 }
 
-bool APDS9960::readRedLight(uint16_t &val)
+int APDS9960::readRedLight()
 {
     uint8_t val_byte;
-    val = 0;
+    int val = 0;
     
-    /* Read value from clear channel, low byte register */
+    /* Read value from red channel, low byte register */
     if( !wireReadDataByte(APDS9960_RDATAL, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
-    val = val_byte;
+    val += val_byte;
     
-    /* Read value from clear channel, high byte register */
+    /* Read value from red channel, high byte register */
     if( !wireReadDataByte(APDS9960_RDATAH, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     val = val + ((uint16_t)val_byte << 8);
     
-    return true;
+    return val;
 }
 
-bool APDS9960::readGreenLight(uint16_t &val)
+int APDS9960::readGreenLight()
 {
     uint8_t val_byte;
-    val = 0;
+    int val = 0;
     
-    /* Read value from clear channel, low byte register */
+    /* Read value from green channel, low byte register */
     if( !wireReadDataByte(APDS9960_GDATAL, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
-    val = val_byte;
+    val += val_byte;
     
-    /* Read value from clear channel, high byte register */
+    /* Read value from green channel, high byte register */
     if( !wireReadDataByte(APDS9960_GDATAH, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     val = val + ((uint16_t)val_byte << 8);
     
-    return true;
+    return val;
 }
 
-bool APDS9960::readBlueLight(uint16_t &val)
+int APDS9960::readBlueLight()
 {
     uint8_t val_byte;
-    val = 0;
+    int val = 0;
     
-    /* Read value from clear channel, low byte register */
+    /* Read value from blue channel, low byte register */
     if( !wireReadDataByte(APDS9960_BDATAL, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
-    val = val_byte;
+    val += val_byte;
     
-    /* Read value from clear channel, high byte register */
+    /* Read value from blue channel, high byte register */
     if( !wireReadDataByte(APDS9960_BDATAH, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     val = val + ((uint16_t)val_byte << 8);
     
-    return true;
+    return val;
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Proximity sensor controls
 //////////////////////////////////////////////////////////////////////////////
 
-bool APDS9960::readProximity(uint8_t &val)
+int APDS9960::readProximity()
 {
-    val = 0;
+    uint8_t val = 0;
     
     /* Read value from proximity data register */
     if( !wireReadDataByte(APDS9960_PDATA, val) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     
-    return true;
+    return (int)val;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -865,20 +897,21 @@ bool APDS9960::decodeGesture()
 // Getters and setters for register values
 //////////////////////////////////////////////////////////////////////////////
 
-uint8_t APDS9960::getProxIntLowThresh()
+int APDS9960::getProxIntLowThresh()
 {
-    uint8_t val;
+    uint8_t val = 0;
     
     /* Read value from PILT register */
     if( !wireReadDataByte(APDS9960_PILT, val) ) {
-        val = 0;
+        return APDS9960_ERROR;
     }
     
-    return val;
+    return (int)val;
 }
 
 bool APDS9960::setProxIntLowThresh(uint8_t threshold)
 {
+
     if( !wireWriteDataByte(APDS9960_PILT, threshold) ) {
         return false;
     }
@@ -886,16 +919,16 @@ bool APDS9960::setProxIntLowThresh(uint8_t threshold)
     return true;
 }
 
-uint8_t APDS9960::getProxIntHighThresh()
+int APDS9960::getProxIntHighThresh()
 {
-    uint8_t val;
+    uint8_t val = 0;
     
     /* Read value from PIHT register */
     if( !wireReadDataByte(APDS9960_PIHT, val) ) {
-        val = 0;
+        return APDS9960_ERROR;
     }
     
-    return val;
+    return (int)val;
 }
 
 bool APDS9960::setProxIntHighThresh(uint8_t threshold)
@@ -1288,24 +1321,24 @@ bool APDS9960::setGestureWaitTime(uint8_t time)
     return true;
 }
 
-bool APDS9960::getLightIntLowThreshold(uint16_t &threshold)
+int APDS9960::getLightIntLowThreshold()
 {
     uint8_t val_byte;
-    threshold = 0;
+    int threshold = 0;
     
     /* Read value from ambient light low threshold, low byte register */
     if( !wireReadDataByte(APDS9960_AILTL, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
-    threshold = val_byte;
+    threshold += val_byte;
     
     /* Read value from ambient light low threshold, high byte register */
     if( !wireReadDataByte(APDS9960_AILTH, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     threshold = threshold + ((uint16_t)val_byte << 8);
     
-    return true;
+    return threshold;
 }
 
 bool APDS9960::setLightIntLowThreshold(uint16_t threshold)
@@ -1330,24 +1363,24 @@ bool APDS9960::setLightIntLowThreshold(uint16_t threshold)
     return true;
 }
 
-bool APDS9960::getLightIntHighThreshold(uint16_t &threshold)
+int APDS9960::getLightIntHighThreshold()
 {
     uint8_t val_byte;
-    threshold = 0;
+    int threshold = 0;
     
     /* Read value from ambient light high threshold, low byte register */
     if( !wireReadDataByte(APDS9960_AIHTL, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
-    threshold = val_byte;
+    threshold += val_byte;
     
     /* Read value from ambient light high threshold, high byte register */
     if( !wireReadDataByte(APDS9960_AIHTH, val_byte) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     threshold = threshold + ((uint16_t)val_byte << 8);
     
-    return true;
+    return threshold;
 }
 
 bool APDS9960::setLightIntHighThreshold(uint16_t threshold)
@@ -1372,16 +1405,16 @@ bool APDS9960::setLightIntHighThreshold(uint16_t threshold)
     return true;
 }
 
-bool APDS9960::getProximityIntLowThreshold(uint8_t &threshold)
+int APDS9960::getProximityIntLowThreshold()
 {
-    threshold = 0;
+    uint8_t threshold = 0;
     
     /* Read value from proximity low threshold register */
     if( !wireReadDataByte(APDS9960_PILT, threshold) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     
-    return true;
+    return (int)threshold;
 }
 
 bool APDS9960::setProximityIntLowThreshold(uint8_t threshold)
@@ -1395,16 +1428,16 @@ bool APDS9960::setProximityIntLowThreshold(uint8_t threshold)
     return true;
 }
 
-bool APDS9960::getProximityIntHighThreshold(uint8_t &threshold)
+int APDS9960::getProximityIntHighThreshold()
 {
-    threshold = 0;
+    uint8_t threshold = 0;
     
     /* Read value from proximity low threshold register */
     if( !wireReadDataByte(APDS9960_PIHT, threshold) ) {
-        return false;
+        return APDS9960_ERROR;
     }
     
-    return true;
+    return threshold;
 }
 
 bool APDS9960::setProximityIntHighThreshold(uint8_t threshold)
@@ -1593,74 +1626,20 @@ bool APDS9960::setGestureMode(uint8_t mode)
 // Raw I2C Commands
 //////////////////////////////////////////////////////////////////////////////
 
-bool APDS9960::wireWriteByte(uint8_t val)
-{
-    mraa::Result error = mraa::SUCCESS;
-
-    // Set address of device
-    error = m_i2c.address(APDS9960_I2C_ADDR);
-    if ( error != mraa::SUCCESS ) {
-        return false;
-    }
-
-    // Write value to bus
-    error = m_i2c.writeByte(val);
-    if ( error != mraa::SUCCESS ) {
-        return false;
-    }
-    
-    return true;
-}
-
 bool APDS9960::wireWriteDataByte(uint8_t reg, uint8_t val)
 {
     mraa::Result error = mraa::SUCCESS;
 
-    // Send address of device
-    error = m_i2c.address(APDS9960_I2C_ADDR);
-    if ( error != mraa::SUCCESS ) {
-        return false;
-    }
-
-    // Write register to bus
-    error = m_i2c.writeByte(reg);
-    if ( error != mraa::SUCCESS ) {
-        return false;
-    }
-
-    // Write value to register
-    error = m_i2c.writeByte(val);
-    if ( error != mraa::SUCCESS ) {
-        return false;
-    }
-
-    return true;
-
-}
-
-bool APDS9960::wireWriteDataBlock(uint8_t reg, uint8_t *val, unsigned int len)
-{
-    mraa::Result error = mraa::SUCCESS;
-    unsigned int i;
-
     // Set address of device
     error = m_i2c.address(APDS9960_I2C_ADDR);
     if ( error != mraa::SUCCESS ) {
         return false;
     }
 
-    // Write register to bus
-    error = m_i2c.writeByte(reg);
+    // Write data to a register on the device
+    error = m_i2c.writeReg(reg, val);
     if ( error != mraa::SUCCESS ) {
         return false;
-    }
-
-    // Write values to device
-    for(i = 0; i < len; i++) {
-        error = m_i2c.writeByte(val[i]);
-        if ( error != mraa::SUCCESS ) {
-            return false;
-        }
     }
 
     return true;
@@ -1676,21 +1655,8 @@ bool APDS9960::wireReadDataByte(uint8_t reg, uint8_t &val)
         return false;
     }
     
-    // Write register to bus
-    error = m_i2c.writeByte(reg);
-    if ( error != mraa::SUCCESS ) {
-        return false;
-    }
+    val = m_i2c.readReg(reg);
     
-    // Set address of device
-    error = m_i2c.address(APDS9960_I2C_ADDR);
-    if ( error != mraa::SUCCESS ) {
-        return false;
-    }
-    
-    // Read byte from device
-    val = m_i2c.readByte();
-
     return true;
 }
 
