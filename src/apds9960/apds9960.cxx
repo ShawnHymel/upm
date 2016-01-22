@@ -575,6 +575,11 @@ int APDS9960::readAmbientLight()
     printf("B2:%#04x Total:%i\n", val_byte, val);
 #endif
     
+    /* Clear ambient light interrupt by performing an "address access" */
+    if( !wireWriteByte(APDS9960_CICLEAR) ) {
+        return APDS9960_ERROR;
+    }
+    
     return val;
 }
 
@@ -1486,6 +1491,16 @@ bool APDS9960::setAmbientLightIntEnable(uint8_t enable)
         return false;
     }
     
+#if APDS9960_ENABLE
+    uint8_t temp;
+    if (!wireReadDataByte(APDS9960_ENABLE, temp)) {
+        return false;
+    }
+    printf("Setting ambient light interrupt. ENABLE:\n");
+    printf("Wrote &%#04x: %#04x\n", APDS9960_ENABLE, val);
+    printf("Read &%#04x: %#04x\n", APDS9960_ENABLE, temp);
+#endif
+    
     return true;
 }
 
@@ -1625,6 +1640,25 @@ bool APDS9960::setGestureMode(uint8_t mode)
 ///////////////////////////////////////////////////////////////////////////////
 // Raw I2C Commands
 //////////////////////////////////////////////////////////////////////////////
+
+bool APDS9960::wireWriteByte(uint8_t val)
+{
+    mraa::Result error = mraa::SUCCESS;
+
+    // Set address of device
+    error = m_i2c.address(APDS9960_I2C_ADDR);
+    if ( error != mraa::SUCCESS ) {
+        return false;
+    }
+
+    // Write data to a register on the device
+    error = m_i2c.writeByte(val);
+    if ( error != mraa::SUCCESS ) {
+        return false;
+    }
+
+    return true;
+}
 
 bool APDS9960::wireWriteDataByte(uint8_t reg, uint8_t val)
 {

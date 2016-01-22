@@ -31,7 +31,7 @@
 #include <mraa/i2c.hpp>
 
 // Debug
-#define APDS9960_DEBUG          0
+#define APDS9960_DEBUG          1
 
 // APDS-9960 I2C address
 #define APDS9960_I2C_ADDR       0x39
@@ -923,6 +923,14 @@ namespace upm {
             ///////////////////////////////////////////////////////////////////
             // Raw I2C Commands
             //////////////////////////////////////////////////////////////////
+            
+            /**
+             * @brief Writes address and given byte to the bus
+             *
+             * @param[in] val the 1-byte value to write to the I2C bus
+             * @return True if successful write operation. False otherwise.
+             */
+            bool wireWriteByte(uint8_t val);
             
             /**
              * @brief Writes a single byte to the I2C device and given register
