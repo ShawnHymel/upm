@@ -31,7 +31,7 @@
 #include <mraa/i2c.hpp>
 
 // Debug
-#define APDS9960_DEBUG          1
+#define APDS9960_DEBUG          0
 
 // APDS-9960 I2C address
 #define APDS9960_I2C_ADDR       0x39

@@ -656,6 +656,11 @@ int APDS9960::readProximity()
         return APDS9960_ERROR;
     }
     
+    /* Clear proximity interrupt by performing an "address access" */
+    if( !wireWriteByte(APDS9960_PICLEAR) ) {
+        return APDS9960_ERROR;
+    }
+    
     return (int)val;
 }
 
@@ -1491,7 +1496,7 @@ bool APDS9960::setAmbientLightIntEnable(uint8_t enable)
         return false;
     }
     
-#if APDS9960_ENABLE
+#if APDS9960_DEBUG
     uint8_t temp;
     if (!wireReadDataByte(APDS9960_ENABLE, temp)) {
         return false;
