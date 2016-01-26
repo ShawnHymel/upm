@@ -704,8 +704,15 @@ bool APDS9960::processGestureData()
     int lr_delta;
     int i;
 
+#if APDS9960_DEBUG
+    printf("Processing gesture data.\n");
+#endif
+
     /* If we have less than 4 total gestures, that's not enough */
     if( gesture_data_.total_gestures <= 4 ) {
+#if APDS9960_DEBUG
+        printf("4 or less total gestures found. Returning.\n");
+#endif
         return false;
     }
     
@@ -731,7 +738,6 @@ bool APDS9960::processGestureData()
         /* If one of the _first values is 0, then there is no good data */
         if( (u_first == 0) || (d_first == 0) || \
             (l_first == 0) || (r_first == 0) ) {
-            
             return false;
         }
         /* Find the last value in U/D/L/R above the threshold */
@@ -755,6 +761,17 @@ bool APDS9960::processGestureData()
                 break;
             }
         }
+    }
+
+    /* Catch to make sure we don't divide by 0 */
+    if( ((u_first + d_first) == 0) ||
+        ((l_first + r_first) == 0) ||
+        ((u_last + d_last) == 0) ||
+        ((l_last + r_last) == 0) ) {
+#if APDS9960_DEBUG
+        printf("We're about to divide by 0. Returning.\n");
+#endif
+        return false;
     }
     
     /* Calculate the first vs. last ratio of up/down and left/right */

@@ -118,7 +118,7 @@ setTimeout(function() {
     if (gs.disableLightSensor()) {
         console.log("Light sensor stopped");
     } else {
-        console.log("Something wnet wrong during light sensor disable!");
+        console.log("Something went wrong during light sensor disable!");
     }
 
     // Set proximity gain
@@ -146,7 +146,7 @@ setTimeout(function() {
     if (gs.disableProximitySensor()) {
         console.log("Proximity sensor stopped");
     } else {
-        console.log("Something wnet wrong during light sensor disable!");
+        console.log("Something went wrong during proximity sensor disable!");
     }
 
     // Start gesture sensor engine (no interrupts)
@@ -169,7 +169,7 @@ setTimeout(function() {
     if (gs.disableGestureSensor()) {
         console.log("Gesture sensor stopped");
     } else {
-        console.log("Something went wrong during gesture sensor init!");
+        console.log("Something went wrong during gesture sensor disable!");
         return;
     }
 }, 20000);

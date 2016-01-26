@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     if (gs->disableLightSensor()) {
         printf("Light sensor stopped\n");
     } else {
-        printf("Something wnet wrong during light sensor disable!\n");
+        printf("Something went wrong during light sensor disable!\n");
     }
     
     // Set proximity gain
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
     if (gs->disableProximitySensor()) {
         printf("Proximity sensor stopped\n");
     } else {
-        printf("Something wnet wrong during light sensor disable!\n");
+        printf("Something went wrong during proximity sensor disable!\n");
     }
     
     // Start gesture engine (no interrupts)
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
     // Wait 200 ms for the sensor to begin
     usleep(200000);
 
-    // Run the proximity sensor for 10 seconds
+    // Run the gesture sensor for 10 seconds
     t = 0;
     while (t < 100) {
         if (gs->isGestureAvailable()) {
@@ -150,7 +150,7 @@ int main(int argc, char **argv) {
     if (gs->disableGestureSensor()) {
         printf("Gesture sensor stopped\n");
     } else {
-        printf("Something went wrong during gesture sensor init!\n");
+        printf("Something went wrong during gesture sensor disable!\n");
     }
     
     // Don't forget to free up that memory!
