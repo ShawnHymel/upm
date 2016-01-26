@@ -121,7 +121,7 @@ setTimeout(function() {
         console.log("Something wnet wrong during light sensor disable!");
     }
 
-    // Start proximity sensor
+    // Set proximity gain
     if (!gs.setProximityGain(apds9960.PGAIN_2X)) {
         console.log("Something went wrong trying to set PGAIN");
     }
