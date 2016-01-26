@@ -1,0 +1,5 @@
+set (libname "apds9960")
+set (libdescription "libupm APDS9960 I2C gesture sensor")
+set (module_src apds9960.cxx)
+set (module_h apds9960.h)
+upm_module_init()
